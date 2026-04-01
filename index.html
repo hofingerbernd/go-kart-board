@@ -23,7 +23,7 @@
           <div class="brand-badge">GK</div>
           <div>
             <p class="eyebrow">Go-Kart Racing</p>
-            <h1>Live Timing &amp; Scoring</h1>
+            <h1>Anzeigetafel</h1>
           </div>
         </div>
 
@@ -57,8 +57,13 @@
 
           <div class="leader-panel">
             <span class="leader-label">Leader</span>
-            <strong id="leader-name">-</strong>
-            <span id="leader-kart">-</span>
+            <div class="leader-info-wrapper">
+              <img id="leader-photo" class="leader-photo" src="" alt="Leader" style="display:none;" />
+              <div class="leader-details">
+                <strong id="leader-name">-</strong>
+                <span id="leader-kart">-</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -77,6 +82,7 @@
               <h3>Zeitentabelle</h3>
             </div>
             <div class="admin-global-controls hide-when-not-admin">
+              <button class="admin-action-btn" id="btn-add-driver">+ Neuer Fahrer</button>
               <button class="admin-action-btn safe" id="btn-start-all">▶ Live (Alle)</button>
               <button class="admin-action-btn danger" id="btn-stop-all">■ Stopp (Alle)</button>
               <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset</button>
@@ -168,7 +174,8 @@
             </div>
           </div>
         </div>
-        <footer class="modal-footer">
+        <footer class="modal-footer" style="display: flex; justify-content: space-between;">
+          <button id="btn-delete-driver" class="admin-action-btn danger">Löschen</button>
           <button id="save-driver-btn" class="admin-action-btn safe">Speichern</button>
         </footer>
       </div>

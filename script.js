@@ -59,6 +59,7 @@ const elements = {
   clock: document.querySelector("#current-time"),
   leaderName: document.querySelector("#leader-name"),
   leaderKart: document.querySelector("#leader-kart"),
+  leaderPhoto: document.querySelector("#leader-photo"),
   raceProgress: document.querySelector("#race-progress"),
   eventNameEl: document.querySelector("#event-name"),
   eventTitleEl: document.querySelector("#event-title"),
@@ -84,6 +85,8 @@ const elements = {
   editPhotoPreview: document.querySelector("#edit-photo-preview"),
   saveDriverBtn: document.querySelector("#save-driver-btn"),
   editDriverId: document.querySelector("#edit-driver-id"),
+  btnDeleteDriver: document.querySelector("#btn-delete-driver"),
+  btnAddDriver: document.querySelector("#btn-add-driver"),
   // Settings Modal Elements
   settingsModal: document.querySelector("#settings-modal"),
   closeSettingsBtn: document.querySelector("#close-settings-btn"),
@@ -309,9 +312,16 @@ function renderSummary() {
 
   elements.eventNameEl.textContent = raceSettings.eventName;
   elements.eventTitleEl.textContent = raceSettings.eventTitle;
-  elements.leaderName.textContent = leader.name;
-  elements.leaderKart.textContent = leader.kart;
-  elements.raceProgress.textContent = `${raceSettings.trackName} - Runde ${leader.laps}/${raceSettings.totalLaps}`;
+  elements.leaderName.textContent = leader ? leader.name : "-";
+  elements.leaderKart.textContent = leader ? leader.kart : "-";
+  elements.raceProgress.textContent = `${raceSettings.trackName} - Runde ${leader ? leader.laps : 0}/${raceSettings.totalLaps}`;
+  
+  if (leader && leader.photoDataUrl) {
+    elements.leaderPhoto.src = leader.photoDataUrl;
+    elements.leaderPhoto.style.display = "block";
+  } else {
+    elements.leaderPhoto.style.display = "none";
+  }
   
   if (fastestDriver) {
       elements.fastestLap.textContent = formatLapTime(fastestDriver.bestLapMs);
@@ -334,6 +344,26 @@ function renderBoard() {
 /* === LOOP & EVENTS === */
 elements.adminToggle.addEventListener("click", () => {
     document.body.classList.toggle("admin-active");
+});
+
+elements.btnAddDriver.addEventListener("click", () => {
+    const newId = drivers.length > 0 ? Math.max(...drivers.map(d => d.id)) + 1 : 1;
+    drivers.push({
+        id: newId,
+        name: `Fahrer ${newId}`,
+        team: "-",
+        teamColor: "#ffffff",
+        kart: `#${newId}`,
+        photoDataUrl: null,
+        lastLapMs: 0,
+        bestLapMs: 0,
+        gapMs: 0,
+        laps: 0,
+        status: "pit",
+        lapStartMs: null,
+        isRunning: false
+    });
+    pushToCloud();
 });
 
 elements.btnStartAll.addEventListener("click", () => {
@@ -450,10 +480,27 @@ elements.saveDriverBtn.addEventListener("click", () => {
     driver.teamColor = elements.editTeamColor.value;
     driver.kart = elements.editKart.value || "-";
     
+    // Alle Fahrer im selben Team bekommen automatisch dieselbe Farbe
+    if (driver.team !== "-" && driver.team.trim() !== "") {
+        drivers.forEach(d => {
+            if (d.team === driver.team) {
+                d.teamColor = driver.teamColor;
+            }
+        });
+    }
+    
     if (elements.editPhotoPreview.dataset.tempUrl) {
         driver.photoDataUrl = elements.editPhotoPreview.dataset.tempUrl;
     }
     
+    closeEditModal();
+    pushToCloud();
+});
+
+elements.btnDeleteDriver.addEventListener("click", () => {
+    if (!confirm("Fahrer wirklich komplett löschen?")) return;
+    const id = parseInt(elements.editDriverId.value);
+    drivers = drivers.filter(d => d.id !== id);
     closeEditModal();
     pushToCloud();
 });
