@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go-Kart Wettbewerb Board</title>
+    <meta
+      name="description"
+      content="Live Timing und Scoring Board fuer einen Go-Kart Wettbewerb."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Orbitron:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="race-header">
+        <div class="brand-block">
+          <div class="brand-badge">GK</div>
+          <div>
+            <p class="eyebrow">Go-Kart Racing</p>
+            <h1>Live Timing &amp; Scoring</h1>
+          </div>
+        </div>
+
+        <div class="header-status">
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            LIVE
+          </div>
+          <div class="clock-box">
+            <span class="clock-label">Zeit</span>
+            <strong id="current-time">00:00:00</strong>
+          </div>
+          <button id="settings-toggle" class="admin-btn-toggle hide-when-not-admin" title="Renn-Einstellungen" aria-label="Settings">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+          <button id="admin-toggle" class="admin-btn-toggle" title="Admin-Modus" aria-label="Admin">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="content-wrap">
+        <section class="hero-banner">
+          <div class="hero-copy">
+            <p class="eyebrow" id="event-name">Finale 2026</p>
+            <h2 id="event-title">Go-Kart Grand Prix</h2>
+            <p class="hero-subline" id="race-progress">
+              Kartbahn Muenchen - Runde 0/25
+            </p>
+          </div>
+
+          <div class="leader-panel">
+            <span class="leader-label">Leader</span>
+            <strong id="leader-name">-</strong>
+            <span id="leader-kart">-</span>
+          </div>
+        </section>
+
+        <section class="top-grid">
+          <div class="section-heading">
+            <p class="eyebrow">Podium</p>
+            <h3>Top 3 Fahrer</h3>
+          </div>
+          <div class="podium-grid" id="top-drivers"></div>
+        </section>
+
+        <section class="timing-section">
+          <div class="section-heading timing-heading">
+            <div>
+              <p class="eyebrow">Live</p>
+              <h3>Zeitentabelle</h3>
+            </div>
+            <div class="admin-global-controls hide-when-not-admin">
+              <button class="admin-action-btn safe" id="btn-start-all">▶ Live (Alle)</button>
+              <button class="admin-action-btn danger" id="btn-stop-all">■ Stopp (Alle)</button>
+              <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset</button>
+            </div>
+            <div class="status-pill subtle hide-when-admin">
+              <span class="status-dot"></span>
+              Automatische Aktualisierung
+            </div>
+          </div>
+
+          <div class="timing-table">
+            <div class="timing-row timing-row--head">
+              <span>Pos</span>
+              <span>Fahrer</span>
+              <span>Team</span>
+              <span>Kart</span>
+              <span>Letzte Runde</span>
+              <span>Beste Runde</span>
+              <span>Abstand</span>
+              <span>Runden</span>
+              <span class="hide-when-not-admin">Admin</span>
+            </div>
+            <div id="timing-rows"></div>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <p class="eyebrow">Bestwert</p>
+            <h3>Schnellste Runde</h3>
+            <strong id="fastest-lap">00:00.000</strong>
+            <span id="fastest-driver">-</span>
+          </article>
+
+          <article class="stat-card">
+            <p class="eyebrow">Tempo</p>
+            <h3>Durchschnitt</h3>
+            <strong id="average-lap">00:00.000</strong>
+            <span>Alle Fahrer im Feld</span>
+          </article>
+
+          <article class="stat-card">
+            <p class="eyebrow">Status</p>
+            <h3>Rennstatus</h3>
+            <strong class="stat-highlight">Aktiv</strong>
+            <span id="status-progress">Runde 0 von 25</span>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <!-- Edit Driver Modal -->
+    <div id="driver-edit-modal" class="modal-backdrop hide-modal">
+      <div class="modal-window">
+        <header class="modal-header">
+          <h3>Fahrer Bearbeiten</h3>
+          <button id="close-modal-btn" class="modal-close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+          <input type="hidden" id="edit-driver-id" />
+          
+          <div class="form-group">
+            <label for="edit-name">Name</label>
+            <input type="text" id="edit-name" placeholder="z.B. Max Weber" />
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-team">Team</label>
+            <input type="text" id="edit-team" placeholder="z.B. Red Bull Racing" />
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-team-color">Team Farbe</label>
+            <div class="color-picker-wrap">
+               <input type="color" id="edit-team-color" value="#ffffff" />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-kart">Kart Nummer</label>
+            <input type="text" id="edit-kart" placeholder="z.B. #44" />
+          </div>
+          
+          <div class="form-group">
+            <label>Profilfoto</label>
+            <div class="photo-upload-container">
+              <div class="photo-preview" id="edit-photo-preview"></div>
+              <input type="file" id="edit-photo-file" accept="image/*" />
+            </div>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button id="save-driver-btn" class="admin-action-btn safe">Speichern</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-backdrop hide-modal">
+      <div class="modal-window">
+        <header class="modal-header">
+          <h3>Renn-Einstellungen</h3>
+          <button id="close-settings-btn" class="modal-close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="set-event-name">Event Name</label>
+            <input type="text" id="set-event-name" placeholder="z.B. Finale 2026" />
+          </div>
+          <div class="form-group">
+            <label for="set-event-title">Obertitel</label>
+            <input type="text" id="set-event-title" placeholder="z.B. Go-Kart Grand Prix" />
+          </div>
+          <div class="form-group">
+            <label for="set-track-name">Streckenname</label>
+            <input type="text" id="set-track-name" placeholder="z.B. Kartbahn München" />
+          </div>
+          <div class="form-group">
+            <label for="set-total-laps">Rundenanzahl</label>
+            <input type="number" id="set-total-laps" min="1" max="500" placeholder="25" />
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button id="save-settings-btn" class="admin-action-btn safe">Einstellungen Speichern</button>
+        </footer>
+      </div>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
