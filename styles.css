@@ -95,6 +95,15 @@ body::before {
   box-shadow: inset 0 -8px 18px rgba(225, 6, 0, 0.14);
 }
 
+.brand-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: white;
+  padding: 4px;
+}
+
 .eyebrow {
   margin: 0 0 0.2rem;
   color: var(--muted);

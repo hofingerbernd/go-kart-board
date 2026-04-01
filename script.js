@@ -57,6 +57,8 @@ onValue(ref(db, '/'), (snapshot) => {
 /* === DOM ELEMENTE === */
 const elements = {
   clock: document.querySelector("#current-time"),
+  brandLogo: document.querySelector("#brand-logo"),
+  brandBadgeText: document.querySelector("#brand-badge-text"),
   leaderName: document.querySelector("#leader-name"),
   leaderKart: document.querySelector("#leader-kart"),
   leaderPhoto: document.querySelector("#leader-photo"),
@@ -94,10 +96,19 @@ const elements = {
   setEventTitle: document.querySelector("#set-event-title"),
   setTrackName: document.querySelector("#set-track-name"),
   setTotalLaps: document.querySelector("#set-total-laps"),
-  saveSettingsBtn: document.querySelector("#save-settings-btn")
+  editLogoFile: document.querySelector("#edit-logo-file"),
+  editLogoPreview: document.querySelector("#edit-logo-preview"),
+  saveSettingsBtn: document.querySelector("#save-settings-btn"),
+  // Login Modal Elements
+  loginModal: document.querySelector("#login-modal"),
+  closeLoginBtn: document.querySelector("#close-login-btn"),
+  adminPasswordInput: document.querySelector("#admin-password-input"),
+  loginErrorMsg: document.querySelector("#login-error-msg"),
+  loginSubmitBtn: document.querySelector("#login-submit-btn")
 };
 
 let podiumPage = 0;
+let isAdmin = false;
 
 /* === HILFSFUNKTIONEN === */
 function formatClock(date) {
@@ -312,6 +323,17 @@ function renderSummary() {
 
   elements.eventNameEl.textContent = raceSettings.eventName;
   elements.eventTitleEl.textContent = raceSettings.eventTitle;
+  
+  // Header Logo Logic
+  if (raceSettings.logoDataUrl) {
+      elements.brandLogo.src = raceSettings.logoDataUrl;
+      elements.brandLogo.style.display = "block";
+      elements.brandBadgeText.style.display = "none";
+  } else {
+      elements.brandLogo.style.display = "none";
+      elements.brandBadgeText.style.display = "grid";
+  }
+  
   elements.leaderName.textContent = leader ? leader.name : "-";
   elements.leaderKart.textContent = leader ? leader.kart : "-";
   elements.raceProgress.textContent = `${raceSettings.trackName} - Runde ${leader ? leader.laps : 0}/${raceSettings.totalLaps}`;
@@ -341,9 +363,43 @@ function renderBoard() {
   renderSummary();
 }
 
+/* === ADMIN LOGIN LOGIK === */
+function openLoginModal() {
+    elements.adminPasswordInput.value = "";
+    elements.loginErrorMsg.style.display = "none";
+    elements.loginModal.classList.remove("hide-modal");
+    setTimeout(() => elements.adminPasswordInput.focus(), 100);
+}
+
+function closeLoginModal() {
+    elements.loginModal.classList.add("hide-modal");
+}
+
+function attemptLogin() {
+    const pwd = elements.adminPasswordInput.value;
+    if (pwd === "Bernd301271") {
+        isAdmin = true;
+        document.body.classList.add("admin-active");
+        closeLoginModal();
+    } else {
+        elements.loginErrorMsg.style.display = "block";
+    }
+}
+
+elements.closeLoginBtn.addEventListener("click", closeLoginModal);
+elements.loginSubmitBtn.addEventListener("click", attemptLogin);
+elements.adminPasswordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") attemptLogin();
+});
+
 /* === LOOP & EVENTS === */
 elements.adminToggle.addEventListener("click", () => {
-    document.body.classList.toggle("admin-active");
+    if (isAdmin) {
+        isAdmin = false;
+        document.body.classList.remove("admin-active");
+    } else {
+        openLoginModal();
+    }
 });
 
 elements.btnAddDriver.addEventListener("click", () => {
@@ -517,10 +573,23 @@ window.stopDriverCloud = function(id) {
 
 /* === SETTINGS LOGIC === */
 elements.settingsToggle.addEventListener("click", () => {
+    if (!isAdmin) {
+        openLoginModal();
+        return;
+    }
     elements.setEventName.value = raceSettings.eventName;
     elements.setEventTitle.value = raceSettings.eventTitle;
     elements.setTrackName.value = raceSettings.trackName;
     elements.setTotalLaps.value = raceSettings.totalLaps;
+    
+    if (raceSettings.logoDataUrl) {
+        elements.editLogoPreview.style.backgroundImage = `url('${raceSettings.logoDataUrl}')`;
+        elements.editLogoPreview.dataset.tempUrl = raceSettings.logoDataUrl;
+    } else {
+        elements.editLogoPreview.style.backgroundImage = "none";
+        delete elements.editLogoPreview.dataset.tempUrl;
+    }
+    
     elements.settingsModal.classList.remove("hide-modal");
 });
 
@@ -528,11 +597,28 @@ elements.closeSettingsBtn.addEventListener("click", () => {
     elements.settingsModal.classList.add("hide-modal");
 });
 
+elements.editLogoFile.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const dataUrl = event.target.result;
+        elements.editLogoPreview.style.backgroundImage = `url('${dataUrl}')`;
+        elements.editLogoPreview.dataset.tempUrl = dataUrl;
+    };
+    reader.readAsDataURL(file);
+});
+
 elements.saveSettingsBtn.addEventListener("click", () => {
-    raceSettings.eventName = elements.setEventName.value;
-    raceSettings.eventTitle = elements.setEventTitle.value;
-    raceSettings.trackName = elements.setTrackName.value;
-    raceSettings.totalLaps = parseInt(elements.setTotalLaps.value) || 25;
+    raceSettings.eventName = elements.setEventName.value || "Go-Kart Rennen";
+    raceSettings.eventTitle = elements.setEventTitle.value || "Live Timing Board";
+    raceSettings.trackName = elements.setTrackName.value || "Rennstrecke";
+    raceSettings.totalLaps = parseInt(elements.setTotalLaps.value) || 20;
+    
+    if (elements.editLogoPreview.dataset.tempUrl) {
+        raceSettings.logoDataUrl = elements.editLogoPreview.dataset.tempUrl;
+    }
     
     elements.settingsModal.classList.add("hide-modal");
     pushToCloud();
