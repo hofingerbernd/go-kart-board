@@ -98,10 +98,8 @@ body::before {
 .brand-logo {
   max-width: 500px;
   height: 200px;
-  border-radius: 12px;
   object-fit: contain;
-  background: white;
-  padding: 6px;
+  background: transparent;
 }
 
 .eyebrow {
