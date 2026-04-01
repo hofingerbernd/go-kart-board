@@ -47,6 +47,11 @@
       </header>
 
       <main class="content-wrap">
+        <div class="view-tabs">
+          <button id="tab-current" class="view-tab-btn active">Aktuelles Rennen</button>
+          <button id="tab-overall" class="view-tab-btn">Gesamtwertung</button>
+        </div>
+
         <section class="hero-banner">
           <div class="hero-copy">
             <p class="eyebrow" id="event-name">Finale 2026</p>
@@ -86,7 +91,8 @@
               <button class="admin-action-btn" id="btn-add-driver">+ Neuer Fahrer</button>
               <button class="admin-action-btn safe" id="btn-start-all">▶ Live (Alle)</button>
               <button class="admin-action-btn danger" id="btn-stop-all">■ Stopp (Alle)</button>
-              <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset</button>
+              <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset Rennen</button>
+              <button class="admin-action-btn danger" id="btn-reset-overall" style="background:#8b0000; border-color:#8b0000;">🗑️ Reset Gesamt</button>
             </div>
             <div class="status-pill subtle hide-when-admin">
               <span class="status-dot"></span>

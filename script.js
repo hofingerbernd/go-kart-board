@@ -104,11 +104,17 @@ const elements = {
   closeLoginBtn: document.querySelector("#close-login-btn"),
   adminPasswordInput: document.querySelector("#admin-password-input"),
   loginErrorMsg: document.querySelector("#login-error-msg"),
-  loginSubmitBtn: document.querySelector("#login-submit-btn")
+  loginSubmitBtn: document.querySelector("#login-submit-btn"),
+  // Tabs
+  tabCurrent: document.querySelector("#tab-current"),
+  tabOverall: document.querySelector("#tab-overall"),
+  // Overall Reset
+  btnResetOverall: document.querySelector("#btn-reset-overall")
 };
 
 let podiumPage = 0;
 let isAdmin = false;
+let viewMode = 'current';
 
 /* === HILFSFUNKTIONEN === */
 function formatClock(date) {
@@ -144,22 +150,29 @@ function getPodiumTier(position) {
 /* === BERECHNUNGEN (STATE) === */
 function sortDrivers() {
   drivers.sort((a, b) => {
-    // 1. Meiste Runden
-    if (b.laps !== a.laps) return b.laps - a.laps;
-    // 2. Kürzeste Gesamtzeit oder Beste Runde als Fallback für Gleichstand bei Runden
-    if (a.bestLapMs === 0 && b.bestLapMs !== 0) return 1;
-    if (b.bestLapMs === 0 && a.bestLapMs !== 0) return -1;
-    return a.bestLapMs - b.bestLapMs; 
+    if (viewMode === 'overall') {
+      if (a.overallBestLapMs === 0 && b.overallBestLapMs !== 0) return 1;
+      if (b.overallBestLapMs === 0 && a.overallBestLapMs !== 0) return -1;
+      return a.overallBestLapMs - b.overallBestLapMs;
+    } else {
+      // 1. Meiste Runden
+      if (b.laps !== a.laps) return b.laps - a.laps;
+      // 2. Kürzeste Gesamtzeit oder Beste Runde als Fallback für Gleichstand bei Runden
+      if (a.bestLapMs === 0 && b.bestLapMs !== 0) return 1;
+      if (b.bestLapMs === 0 && a.bestLapMs !== 0) return -1;
+      return a.bestLapMs - b.bestLapMs; 
+    }
   });
   
-  // Gaps berechnen basierend auf bestem Fahrer (Index 0 nach Sort)
-  const bestDriver = drivers[0];
+  const bestDriver = drivers[0] || {};
   drivers.forEach((d, i) => {
       d.position = i + 1;
-      if (i === 0 || d.bestLapMs === 0 || bestDriver.bestLapMs === 0) {
-          d.gapMs = 0;
+      if (viewMode === 'overall') {
+          if (i === 0 || d.overallBestLapMs === 0 || !bestDriver.overallBestLapMs) d.gapMs = 0;
+          else d.gapMs = d.overallBestLapMs - bestDriver.overallBestLapMs;
       } else {
-          d.gapMs = d.bestLapMs - bestDriver.bestLapMs;
+          if (i === 0 || d.bestLapMs === 0 || !bestDriver.bestLapMs) d.gapMs = 0;
+          else d.gapMs = d.bestLapMs - bestDriver.bestLapMs;
       }
   });
 }
@@ -188,6 +201,9 @@ function startDriver(id) {
         driver.lastLapMs = lapTime;
         if (driver.bestLapMs === 0 || lapTime < driver.bestLapMs) {
             driver.bestLapMs = lapTime;
+        }
+        if (!driver.overallBestLapMs || lapTime < driver.overallBestLapMs) {
+            driver.overallBestLapMs = lapTime;
         }
         driver.laps++;
     }
@@ -221,7 +237,20 @@ function resetAll() {
         d.status = "pit";
         d.lapStartMs = null;
         d.isRunning = false;
-        d.position = d.id;
+        // position is left for sorting
+    });
+}
+
+function resetOverall() {
+    drivers.forEach(d => {
+        d.lastLapMs = 0;
+        d.bestLapMs = 0;
+        d.overallBestLapMs = 0;
+        d.gapMs = 0;
+        d.laps = 0;
+        d.status = "pit";
+        d.lapStartMs = null;
+        d.isRunning = false;
     });
 }
 
@@ -261,12 +290,12 @@ function renderTopDrivers() {
         <div class="stat-line">
           <span>Letzte Runde</span>
           <span class="live-lap-display" data-id="${driver.id}">${
-            driver.isRunning ? formatLapTime(Date.now() - driver.lapStartMs) : formatLapTime(driver.lastLapMs)
+            viewMode === 'overall' ? '-' : (driver.isRunning ? formatLapTime(Date.now() - driver.lapStartMs) : formatLapTime(driver.lastLapMs))
           }</span>
         </div>
         <div class="stat-line">
           <span>Beste Runde</span>
-          <span class="best-lap">${formatLapTime(driver.bestLapMs)}</span>
+          <span class="best-lap">${formatLapTime(viewMode === 'overall' ? driver.overallBestLapMs : driver.bestLapMs)}</span>
         </div>
         <div class="stat-line">
           <span>Abstand</span>
@@ -302,10 +331,10 @@ function renderTimingTable() {
           <span>${driver.team}</span>
         </div>
         <span class="kart-id">${driver.kart}</span>
-        <span class="lap-time live-lap-display" data-id="${driver.id}">${currentDisplayTime}</span>
-        <span class="lap-time best-lap">${formatLapTime(driver.bestLapMs)}</span>
+        <span class="lap-time live-lap-display" data-id="${driver.id}">${viewMode === 'overall' ? '-' : currentDisplayTime}</span>
+        <span class="lap-time best-lap">${formatLapTime(viewMode === 'overall' ? driver.overallBestLapMs : driver.bestLapMs)}</span>
         <span class="gap-value">${driver.gapMs === 0 ? "-" : "+" + (driver.gapMs/1000).toFixed(3)}</span>
-        <span class="laps-value">${driver.laps}</span>
+        <span class="laps-value">${viewMode === 'overall' ? '-' : driver.laps}</span>
         
         <div class="cell-admin-actions hide-when-not-admin">
             <button class="admin-action-btn sm" onclick="window.openEditModal(${driver.id})">Bearbeiten</button>
@@ -413,6 +442,7 @@ elements.btnAddDriver.addEventListener("click", () => {
         photoDataUrl: null,
         lastLapMs: 0,
         bestLapMs: 0,
+        overallBestLapMs: 0,
         gapMs: 0,
         laps: 0,
         status: "pit",
@@ -437,11 +467,38 @@ elements.btnStopAll.addEventListener("click", () => {
 });
 
 elements.btnResetAll.addEventListener("click", () => {
-    if(confirm("Alle Zeiten und Runden wirklich zurücksetzen?")) {
+    if(confirm("Das AKTUELLE Rennen wirklich auf 0 zurücksetzen? (Gesamtwertung bleibt)")) {
         resetAll();
         pushToCloud();
-        renderBoard(); // Lokales Zwischenrendern beibehalten
+        renderBoard();
     }
+});
+
+elements.btnResetOverall.addEventListener("click", () => {
+    if(confirm("SICHERHEITSABFRAGE: Wirklich die komplette Gesamtwertung, alle Runden und Tabellen löschen?!")) {
+        resetOverall();
+        pushToCloud();
+        renderBoard();
+    }
+});
+
+// Tab Listeners
+elements.tabCurrent.addEventListener("click", () => {
+    viewMode = 'current';
+    elements.tabCurrent.classList.add("active");
+    elements.tabOverall.classList.remove("active");
+    updateState();
+    pushToCloud(); // Wenn der Admin umschaltet, wollen wir, dass es alle sehen? 
+    // Wait, the user said: "Zuschauer darf umschalten zwischen aktuell und gesamt"
+    // So the tabs are local only! No pushToCloud() here.
+});
+
+elements.tabOverall.addEventListener("click", () => {
+    viewMode = 'overall';
+    elements.tabOverall.classList.add("active");
+    elements.tabCurrent.classList.remove("active");
+    updateState();
+    // Local only
 });
 
 function tickFast() {
