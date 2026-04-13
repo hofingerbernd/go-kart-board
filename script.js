@@ -141,6 +141,13 @@ function getInitials(name) {
   return name.split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase();
 }
 
+function getDefaultAvatar(driverId) {
+    const defaultAvatars = 9; // Number of images we have generated
+    const id = parseInt(driverId) || 1;
+    const avatarIndex = ((id - 1) % defaultAvatars) + 1;
+    return `assets/avatars/avatar_${avatarIndex}.png`;
+}
+
 function getStatusLabel(status) {
   if (status === "pit") return "In der Box";
   if (status === "finished") return "Im Ziel";
@@ -298,8 +305,7 @@ function renderTopDrivers() {
         </div>
         
         <div class="podium-profile">
-            <div class="podium-avatar" style="background-image: url('${driver.photoDataUrl || ''}'); border-color: ${driver.teamColor || 'var(--tier)'}">
-              ${!driver.photoDataUrl ? getInitials(driver.name) : ''}
+            <div class="podium-avatar" style="background-image: url('${driver.photoDataUrl || getDefaultAvatar(driver.id)}'); border-color: ${driver.teamColor || 'var(--tier)'}">
             </div>
             <div>
               <h4>${driver.name}</h4>
@@ -339,8 +345,7 @@ function renderTimingTable() {
           <span class="position-number">${driver.position}</span>
         </div>
         <div class="driver-meta">
-          <div class="driver-avatar" style="background-image: url('${driver.photoDataUrl || ''}')">
-             ${!driver.photoDataUrl ? getInitials(driver.name) : ''}
+          <div class="driver-avatar" style="background-image: url('${driver.photoDataUrl || getDefaultAvatar(driver.id)}')">
           </div>
           <div>
             <span class="driver-name">${driver.name}</span>
@@ -389,8 +394,8 @@ function renderSummary() {
   elements.leaderKart.textContent = leader ? leader.kart : "-";
   elements.raceProgress.textContent = `${raceSettings.trackName} - Runde ${leader ? leader.laps : 0}/${raceSettings.totalLaps}`;
   
-  if (leader && leader.photoDataUrl) {
-    elements.leaderPhoto.src = leader.photoDataUrl;
+  if (leader) {
+    elements.leaderPhoto.src = leader.photoDataUrl || getDefaultAvatar(leader.id);
     elements.leaderPhoto.style.display = "block";
   } else {
     elements.leaderPhoto.style.display = "none";
@@ -598,12 +603,13 @@ function openEditModal(id) {
         elements.editPhotoPreview.style.backgroundImage = `url('${driver.photoDataUrl}')`;
         elements.editPhotoPreview.textContent = "";
     } else {
-        elements.editPhotoPreview.style.backgroundImage = "none";
-        elements.editPhotoPreview.textContent = getInitials(driver.name);
+        elements.editPhotoPreview.style.backgroundImage = `url('${getDefaultAvatar(driver.id)}')`;
+        elements.editPhotoPreview.textContent = "";
     }
     
-    // Clear file input
+    // Clear file input and temp URL
     elements.editPhotoFile.value = "";
+    delete elements.editPhotoPreview.dataset.tempUrl;
     
     elements.driverEditModal.classList.remove("hide-modal");
 }
