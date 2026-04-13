@@ -222,7 +222,7 @@ function startDriver(id) {
     } else {
         driver.isRunning = true;
         driver.status = "running";
-        driver.lapStartMs = Date.now();
+        driver.lapStartMs = Date.now() - (driver.totalPenaltyMs || 0);
     }
 }
 
@@ -592,7 +592,7 @@ function openEditModal(id) {
     elements.editTeam.value = driver.team || "";
     elements.editTeamColor.value = driver.teamColor || "#ffffff";
     elements.editKart.value = driver.kart;
-    elements.editPenalty.value = "0";
+    elements.editPenalty.value = driver.totalPenaltyMs ? (driver.totalPenaltyMs / 1000).toString() : "0";
     
     if (driver.photoDataUrl) {
         elements.editPhotoPreview.style.backgroundImage = `url('${driver.photoDataUrl}')`;
@@ -661,16 +661,21 @@ elements.saveDriverBtn.addEventListener("click", () => {
     driver.teamColor = elements.editTeamColor.value;
     driver.kart = elements.editKart.value || "-";
     
-    const penaltyMs = parseFloat(elements.editPenalty.value) * 1000;
-    if (!isNaN(penaltyMs) && penaltyMs !== 0) {
+    let penaltyMsInput = parseFloat(elements.editPenalty.value) * 1000;
+    if (isNaN(penaltyMsInput)) penaltyMsInput = 0;
+    
+    const oldPenalty = driver.totalPenaltyMs || 0;
+    const diffMs = penaltyMsInput - oldPenalty;
+
+    if (diffMs !== 0) {
         if (driver.isRunning && driver.lapStartMs) {
-            driver.lapStartMs -= penaltyMs;
+            driver.lapStartMs -= diffMs;
         }
-        if (driver.lastLapMs > 0) driver.lastLapMs = Math.max(0, driver.lastLapMs + penaltyMs);
-        if (driver.bestLapMs > 0) driver.bestLapMs = Math.max(0, driver.bestLapMs + penaltyMs);
-        if (driver.overallBestLapMs > 0) driver.overallBestLapMs = Math.max(0, driver.overallBestLapMs + penaltyMs);
+        if (driver.lastLapMs > 0) driver.lastLapMs = Math.max(0, driver.lastLapMs + diffMs);
+        if (driver.bestLapMs > 0) driver.bestLapMs = Math.max(0, driver.bestLapMs + diffMs);
+        if (driver.overallBestLapMs > 0) driver.overallBestLapMs = Math.max(0, driver.overallBestLapMs + diffMs);
         
-        driver.totalPenaltyMs = (driver.totalPenaltyMs || 0) + penaltyMs;
+        driver.totalPenaltyMs = penaltyMsInput;
     }
     
     // Alle Fahrer im selben Team bekommen automatisch dieselbe Farbe
