@@ -249,6 +249,7 @@ function resetAll() {
         d.laps = 0;
         d.status = "pit";
         d.lapStartMs = null;
+        d.totalPenaltyMs = 0;
         d.isRunning = false;
         // position is left for sorting
     });
@@ -263,6 +264,7 @@ function resetOverall() {
         d.laps = 0;
         d.status = "pit";
         d.lapStartMs = null;
+        d.totalPenaltyMs = 0;
         d.isRunning = false;
     });
 }
@@ -346,6 +348,7 @@ function renderTimingTable() {
         <span class="kart-id">${driver.kart}</span>
         <span class="lap-time live-lap-display" data-id="${driver.id}">${viewMode === 'overall' ? '-' : currentDisplayTime}</span>
         <span class="lap-time best-lap">${formatLapTime(viewMode === 'overall' ? driver.overallBestLapMs : driver.bestLapMs)}</span>
+        <span class="gap-value penalty-col" style="color:var(--accent-strong)">${driver.totalPenaltyMs > 0 ? "+" + (driver.totalPenaltyMs/1000).toFixed(1) + "s" : "-"}</span>
         <span class="gap-value">${driver.gapMs === 0 ? "-" : "+" + (driver.gapMs/1000).toFixed(3)}</span>
         <span class="laps-value">${viewMode === 'overall' ? '-' : driver.laps}</span>
         
@@ -615,6 +618,8 @@ elements.saveDriverBtn.addEventListener("click", () => {
         if (driver.lastLapMs > 0) driver.lastLapMs = Math.max(0, driver.lastLapMs + penaltyMs);
         if (driver.bestLapMs > 0) driver.bestLapMs = Math.max(0, driver.bestLapMs + penaltyMs);
         if (driver.overallBestLapMs > 0) driver.overallBestLapMs = Math.max(0, driver.overallBestLapMs + penaltyMs);
+        
+        driver.totalPenaltyMs = (driver.totalPenaltyMs || 0) + penaltyMs;
     }
     
     // Alle Fahrer im selben Team bekommen automatisch dieselbe Farbe

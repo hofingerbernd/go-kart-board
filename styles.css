@@ -478,7 +478,7 @@ h1 {
 
 .timing-row {
   display: grid;
-  grid-template-columns: 60px minmax(180px, 1.4fr) minmax(130px, 1fr) 70px 120px 120px 90px 70px;
+  grid-template-columns: 60px minmax(180px, 1.4fr) minmax(130px, 1fr) 70px 120px 120px 70px 90px 70px;
   gap: 1rem;
   align-items: center;
   padding: 1rem 1.2rem;
@@ -667,7 +667,7 @@ h1 {
   }
 
   .timing-row {
-    grid-template-columns: 50px minmax(160px, 1.2fr) minmax(110px, 1fr) 60px 100px 100px 70px 60px;
+    grid-template-columns: 50px minmax(160px, 1.2fr) minmax(110px, 1fr) 60px 100px 100px 60px 70px 60px;
     font-size: 0.95rem;
   }
 }
@@ -827,7 +827,7 @@ h1 {
 }
 
 .admin-active .timing-row {
-  grid-template-columns: 60px minmax(180px, 1.4fr) minmax(130px, 1fr) 70px 120px 120px 90px 70px auto;
+  grid-template-columns: 60px minmax(180px, 1.4fr) minmax(130px, 1fr) 70px 120px 120px 70px 90px 70px auto;
 }
 
 .cell-admin-actions {
@@ -838,7 +838,7 @@ h1 {
 
 @media (max-width: 1080px) {
   .admin-active .timing-row {
-     grid-template-columns: 50px minmax(160px, 1.2fr) minmax(110px, 1fr) 60px 100px 100px 70px 60px auto;
+     grid-template-columns: 50px minmax(160px, 1.2fr) minmax(110px, 1fr) 60px 100px 100px 60px 70px 60px auto;
   }
 }
 
