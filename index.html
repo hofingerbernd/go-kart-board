@@ -90,7 +90,7 @@
             <div class="admin-global-controls hide-when-not-admin">
               <button class="admin-action-btn" id="btn-add-driver">+ Neuer Fahrer</button>
               <button class="admin-action-btn safe" id="btn-start-all">▶ Live (Alle)</button>
-              <button class="admin-action-btn danger" id="btn-stop-all">■ Stopp (Alle)</button>
+              <button class="admin-action-btn danger" id="btn-stop-all">■ Ziel / Stopp (Alle)</button>
               <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset Rennen</button>
               <button class="admin-action-btn danger" id="btn-reset-overall" style="background:#8b0000; border-color:#8b0000;">🗑️ Reset Gesamt</button>
             </div>
@@ -106,8 +106,8 @@
               <span>Fahrer</span>
               <span>Team</span>
               <span>Kart</span>
-              <span>Letzte Runde</span>
-              <span>Beste Runde</span>
+              <span>Zeit / Letzte Rnd.</span>
+              <span>Bestzeit</span>
               <span>Abstand</span>
               <span>Runden</span>
               <span class="hide-when-not-admin">Admin</span>
@@ -171,6 +171,12 @@
           <div class="form-group">
             <label for="edit-kart">Kart Nummer</label>
             <input type="text" id="edit-kart" placeholder="z.B. #44" />
+          </div>
+          
+          <div class="form-group">
+            <label for="edit-penalty">Zeitstrafe / Korrektur (Sekunden)</label>
+            <input type="number" id="edit-penalty" placeholder="z.B. 5 für 5s Strafe" value="0" step="0.1" />
+            <p style="font-size: 0.85rem; color: #aaa; margin-top: 5px;">Wird bei "Speichern" einmalig zur Zeit addiert (Korrektur mit Minus möglich).</p>
           </div>
           
           <div class="form-group">

@@ -83,6 +83,7 @@ const elements = {
   editTeam: document.querySelector("#edit-team"),
   editTeamColor: document.querySelector("#edit-team-color"),
   editKart: document.querySelector("#edit-kart"),
+  editPenalty: document.querySelector("#edit-penalty"),
   editPhotoFile: document.querySelector("#edit-photo-file"),
   editPhotoPreview: document.querySelector("#edit-photo-preview"),
   saveDriverBtn: document.querySelector("#save-driver-btn"),
@@ -223,8 +224,20 @@ function stopDriver(id) {
     const driver = drivers.find(d => d.id === id);
     if (!driver || !driver.isRunning) return;
     
+    if (driver.lapStartMs) {
+        const lapTime = Date.now() - driver.lapStartMs;
+        driver.lastLapMs = lapTime;
+        if (driver.bestLapMs === 0 || lapTime < driver.bestLapMs) {
+            driver.bestLapMs = lapTime;
+        }
+        if (!driver.overallBestLapMs || lapTime < driver.overallBestLapMs) {
+            driver.overallBestLapMs = lapTime;
+        }
+        driver.laps++;
+    }
+    
     driver.isRunning = false;
-    driver.status = "pit";
+    driver.status = "finished";
     driver.lapStartMs = null;
 }
 
@@ -288,13 +301,13 @@ function renderTopDrivers() {
       </div>
       <div class="podium-stats">
         <div class="stat-line">
-          <span>Letzte Runde</span>
+          <span>Zeit / Rnd.</span>
           <span class="live-lap-display" data-id="${driver.id}">${
             viewMode === 'overall' ? '-' : (driver.isRunning ? formatLapTime(Date.now() - driver.lapStartMs) : formatLapTime(driver.lastLapMs))
           }</span>
         </div>
         <div class="stat-line">
-          <span>Beste Runde</span>
+          <span>Bestzeit</span>
           <span class="best-lap">${formatLapTime(viewMode === 'overall' ? driver.overallBestLapMs : driver.bestLapMs)}</span>
         </div>
         <div class="stat-line">
@@ -339,7 +352,7 @@ function renderTimingTable() {
         <div class="cell-admin-actions hide-when-not-admin">
             <button class="admin-action-btn sm" onclick="window.openEditModal(${driver.id})">Bearbeiten</button>
             <button class="admin-action-btn sm safe" onclick="window.startDriverCloud(${driver.id})">${driver.isRunning ? 'Runde!' : 'Start'}</button>
-            <button class="admin-action-btn sm danger" onclick="window.stopDriverCloud(${driver.id})">Stopp</button>
+            <button class="admin-action-btn sm danger" onclick="window.stopDriverCloud(${driver.id})">Ziel/Stopp</button>
         </div>
       </div>
     `;
@@ -406,7 +419,7 @@ function closeLoginModal() {
 
 function attemptLogin() {
     const pwd = elements.adminPasswordInput.value;
-    if (pwd === "Bernd301271") {
+    if (pwd === "3012") {
         isAdmin = true;
         document.body.classList.add("admin-active");
         closeLoginModal();
@@ -525,6 +538,7 @@ function openEditModal(id) {
     elements.editTeam.value = driver.team || "";
     elements.editTeamColor.value = driver.teamColor || "#ffffff";
     elements.editKart.value = driver.kart;
+    elements.editPenalty.value = "0";
     
     if (driver.photoDataUrl) {
         elements.editPhotoPreview.style.backgroundImage = `url('${driver.photoDataUrl}')`;
@@ -592,6 +606,16 @@ elements.saveDriverBtn.addEventListener("click", () => {
     driver.team = elements.editTeam.value || "-";
     driver.teamColor = elements.editTeamColor.value;
     driver.kart = elements.editKart.value || "-";
+    
+    const penaltyMs = parseFloat(elements.editPenalty.value) * 1000;
+    if (!isNaN(penaltyMs) && penaltyMs !== 0) {
+        if (driver.isRunning && driver.lapStartMs) {
+            driver.lapStartMs -= penaltyMs;
+        }
+        if (driver.lastLapMs > 0) driver.lastLapMs = Math.max(0, driver.lastLapMs + penaltyMs);
+        if (driver.bestLapMs > 0) driver.bestLapMs = Math.max(0, driver.bestLapMs + penaltyMs);
+        if (driver.overallBestLapMs > 0) driver.overallBestLapMs = Math.max(0, driver.overallBestLapMs + penaltyMs);
+    }
     
     // Alle Fahrer im selben Team bekommen automatisch dieselbe Farbe
     if (driver.team !== "-" && driver.team.trim() !== "") {
