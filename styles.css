@@ -924,7 +924,8 @@ h1 {
   text-transform: uppercase;
 }
 
-.form-group input[type="text"] {
+.form-group input[type="text"],
+.form-group textarea {
   padding: 0.8rem 1rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -935,7 +936,12 @@ h1 {
   transition: border-color 0.2s;
 }
 
+.form-group textarea {
+  resize: vertical;
+}
+
 .form-group input[type="text"]:focus,
+.form-group textarea:focus,
 .form-group input[type="number"]:focus {
   outline: none;
   border-color: var(--accent);

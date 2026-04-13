@@ -90,6 +90,12 @@ const elements = {
   editDriverId: document.querySelector("#edit-driver-id"),
   btnDeleteDriver: document.querySelector("#btn-delete-driver"),
   btnAddDriver: document.querySelector("#btn-add-driver"),
+  btnBatchAddDriver: document.querySelector("#btn-batch-add-driver"),
+  // Batch Add Elements
+  batchAddModal: document.querySelector("#batch-add-modal"),
+  closeBatchModalBtn: document.querySelector("#close-batch-modal-btn"),
+  batchNamesInput: document.querySelector("#batch-names-input"),
+  saveBatchBtn: document.querySelector("#save-batch-btn"),
   // Settings Modal Elements
   settingsModal: document.querySelector("#settings-modal"),
   closeSettingsBtn: document.querySelector("#close-settings-btn"),
@@ -463,9 +469,54 @@ elements.btnAddDriver.addEventListener("click", () => {
         laps: 0,
         status: "pit",
         lapStartMs: null,
+        totalPenaltyMs: 0,
         isRunning: false
     });
     pushToCloud();
+});
+
+elements.btnBatchAddDriver.addEventListener("click", () => {
+    elements.batchNamesInput.value = "";
+    elements.batchAddModal.classList.remove("hide-modal");
+});
+
+elements.closeBatchModalBtn.addEventListener("click", () => {
+    elements.batchAddModal.classList.add("hide-modal");
+});
+
+elements.saveBatchBtn.addEventListener("click", () => {
+    const lines = elements.batchNamesInput.value.split('\n');
+    let added = false;
+    
+    lines.forEach(line => {
+        const name = line.trim();
+        if (name.length > 0) {
+            const newId = drivers.length > 0 ? Math.max(...drivers.map(d => d.id)) + 1 : 1;
+            drivers.push({
+                id: newId,
+                name: name,
+                team: "-",
+                teamColor: "#ffffff",
+                kart: `#${newId}`,
+                photoDataUrl: null,
+                lastLapMs: 0,
+                bestLapMs: 0,
+                overallBestLapMs: 0,
+                gapMs: 0,
+                laps: 0,
+                status: "pit",
+                lapStartMs: null,
+                totalPenaltyMs: 0,
+                isRunning: false
+            });
+            added = true;
+        }
+    });
+    
+    if (added) {
+        pushToCloud();
+    }
+    elements.batchAddModal.classList.add("hide-modal");
 });
 
 elements.btnStartAll.addEventListener("click", () => {

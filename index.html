@@ -89,6 +89,7 @@
             </div>
             <div class="admin-global-controls hide-when-not-admin">
               <button class="admin-action-btn" id="btn-add-driver">+ Neuer Fahrer</button>
+              <button class="admin-action-btn" id="btn-batch-add-driver" style="background:#4a5365; border-color:#4a5365;">+ Liste einfügen</button>
               <button class="admin-action-btn safe" id="btn-start-all">▶ Live (Alle)</button>
               <button class="admin-action-btn danger" id="btn-stop-all">■ Ziel / Stopp (Alle)</button>
               <button class="admin-action-btn warning" id="btn-reset-all">↺ Reset Rennen</button>
@@ -249,6 +250,27 @@
           </div>
           <button id="login-submit-btn" class="admin-action-btn safe" style="width: 100%; margin-top: 1rem;">Freischalten</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Batch Add Modal -->
+    <div id="batch-add-modal" class="modal-backdrop hide-modal">
+      <div class="modal-window">
+        <header class="modal-header">
+          <h3>Fahrerliste importieren</h3>
+          <button id="close-batch-modal-btn" class="modal-close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+          <p style="margin-bottom: 0.5rem; color: #ddd; font-size: 0.95rem;">
+            Kopiere eine Namensliste aus Excel oder Word und füge sie hier ein. Jeder Name muss einfach in einer eigenen Zeile stehen.
+          </p>
+          <div class="form-group">
+            <textarea id="batch-names-input" rows="12" placeholder="Max Mustermann&#10;Anna Schmidt&#10;Leon Schmid&#10;..."></textarea>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button id="save-batch-btn" class="admin-action-btn safe">Alle hinzufügen</button>
+        </footer>
       </div>
     </div>
 
