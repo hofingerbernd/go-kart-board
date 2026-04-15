@@ -89,6 +89,7 @@ const elements = {
   saveDriverBtn: document.querySelector("#save-driver-btn"),
   editDriverId: document.querySelector("#edit-driver-id"),
   btnDeleteDriver: document.querySelector("#btn-delete-driver"),
+  btnResetDriverTime: document.querySelector("#btn-reset-driver-time"),
   btnAddDriver: document.querySelector("#btn-add-driver"),
   btnBatchAddDriver: document.querySelector("#btn-batch-add-driver"),
   // Batch Add Elements
@@ -699,6 +700,26 @@ elements.saveDriverBtn.addEventListener("click", () => {
     
     closeEditModal();
     pushToCloud();
+});
+
+elements.btnResetDriverTime.addEventListener("click", () => {
+    const id = parseInt(elements.editDriverId.value);
+    const driver = drivers.find(d => d.id === id);
+    if (!driver) return;
+    
+    if (confirm(`Möchtest du wirklich alle Runden und Zeiten für ${driver.name} zurücksetzen?`)) {
+        driver.laps = 0;
+        driver.lastLapMs = 0;
+        driver.bestLapMs = 0;
+        driver.overallBestLapMs = 0;
+        driver.gapMs = 0;
+        driver.lapStartMs = null;
+        driver.isRunning = false;
+        driver.status = "pit";
+        
+        pushToCloud();
+        closeEditModal();
+    }
 });
 
 elements.btnDeleteDriver.addEventListener("click", () => {
