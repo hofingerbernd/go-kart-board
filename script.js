@@ -19,7 +19,8 @@ const defaultSettings = {
   eventName: "Finale 2026",
   eventTitle: "Go-Kart Grand Prix",
   trackName: "Kartbahn München",
-  totalLaps: 25
+  totalLaps: 25,
+  highlightedDriverId: null
 };
 
 const defaultDrivers = [
@@ -117,7 +118,16 @@ const elements = {
   tabCurrent: document.querySelector("#tab-current"),
   tabOverall: document.querySelector("#tab-overall"),
   // Overall Reset
-  btnResetOverall: document.querySelector("#btn-reset-overall")
+  btnResetOverall: document.querySelector("#btn-reset-overall"),
+  // TV Focus Panel
+  tvFocusPanel: document.querySelector("#tv-focus-panel"),
+  closeFocusBtn: document.querySelector("#close-focus-btn"),
+  focusPhoto: document.querySelector("#focus-photo"),
+  focusName: document.querySelector("#focus-name"),
+  focusKart: document.querySelector("#focus-kart"),
+  focusTeam: document.querySelector("#focus-team"),
+  focusLastLap: document.querySelector("#focus-last-lap"),
+  focusBestLap: document.querySelector("#focus-best-lap")
 };
 
 let podiumPage = 0;
@@ -286,6 +296,7 @@ function resetOverall() {
 function updateState() {
   sortDrivers();
   renderBoard();
+  renderFocusPanel();
 }
 
 // Window Globals fürs onclick im HTML freigeben
@@ -337,11 +348,12 @@ function renderTopDrivers() {
 function renderTimingTable() {
   elements.timingRows.innerHTML = drivers.map((driver) => {
     const topClass = driver.position <= 3 ? `is-top-${driver.position}` : "";
+    const spotlightClass = raceSettings.highlightedDriverId === driver.id ? "is-spotlight" : "";
     
     const currentDisplayTime = driver.isRunning ? formatLapTime(Date.now() - driver.lapStartMs) : formatLapTime(driver.lastLapMs);
 
     return `
-      <div class="timing-row timing-row--body ${topClass}">
+      <div class="timing-row timing-row--body ${topClass} ${spotlightClass}">
         <div class="position-badge">
           <span class="position-number">${driver.position}</span>
         </div>
@@ -365,6 +377,7 @@ function renderTimingTable() {
         <span class="laps-value">${viewMode === 'overall' ? '-' : driver.laps}</span>
         
         <div class="cell-admin-actions hide-when-not-admin">
+            <button class="admin-action-btn sm" onclick="window.setSpotlightCloud(${driver.id})" style="background: ${raceSettings.highlightedDriverId === driver.id ? '#ff4b2b' : '#3f4551'}; border: 1px solid ${raceSettings.highlightedDriverId === driver.id ? '#ff4b2b' : 'transparent'};">Focus</button>
             <button class="admin-action-btn sm" onclick="window.openEditModal(${driver.id})">Bearbeiten</button>
             <button class="admin-action-btn sm safe" onclick="window.startDriverCloud(${driver.id})">${driver.isRunning ? 'Runde!' : 'Start'}</button>
             <button class="admin-action-btn sm danger" onclick="window.stopDriverCloud(${driver.id})">Ziel/Stopp</button>
@@ -418,6 +431,29 @@ function renderBoard() {
   renderTopDrivers();
   renderTimingTable();
   renderSummary();
+}
+
+function renderFocusPanel() {
+  if (raceSettings.highlightedDriverId && viewMode === 'current') {
+      const driver = drivers.find(d => d.id === raceSettings.highlightedDriverId);
+      if (driver) {
+          elements.focusName.textContent = driver.name;
+          elements.focusKart.textContent = driver.kart;
+          elements.focusTeam.textContent = driver.team && driver.team !== "-" ? driver.team : "Kein Team";
+          elements.focusPhoto.style.backgroundImage = `url('${driver.photoDataUrl || getDefaultAvatar(driver.id)}')`;
+          
+          const lapTime = driver.isRunning ? formatLapTime(Date.now() - driver.lapStartMs) : formatLapTime(driver.lastLapMs);
+          elements.focusLastLap.textContent = lapTime;
+          elements.focusBestLap.textContent = formatLapTime(driver.bestLapMs);
+          
+          elements.focusLastLap.classList.add('live-focus-lap-display');
+          elements.focusLastLap.setAttribute('data-id', driver.id);
+
+          elements.tvFocusPanel.classList.remove("hidden");
+          return;
+      }
+  }
+  elements.tvFocusPanel.classList.add("hidden");
 }
 
 /* === ADMIN LOGIN LOGIK === */
@@ -575,7 +611,7 @@ elements.tabOverall.addEventListener("click", () => {
 });
 
 function tickFast() {
-    document.querySelectorAll('.live-lap-display').forEach(el => {
+    document.querySelectorAll('.live-lap-display, .live-focus-lap-display').forEach(el => {
         const id = parseInt(el.getAttribute('data-id'));
         const driver = drivers.find(d => d.id === id);
         if (driver && driver.isRunning && driver.lapStartMs) {
@@ -731,6 +767,18 @@ elements.btnDeleteDriver.addEventListener("click", () => {
 });
 
 window.openEditModal = openEditModal;
+window.setSpotlightCloud = function(id) {
+    if (raceSettings.highlightedDriverId === id) {
+        raceSettings.highlightedDriverId = null;
+    } else {
+        raceSettings.highlightedDriverId = id;
+    }
+    pushToCloud();
+};
+elements.closeFocusBtn.addEventListener("click", () => {
+    raceSettings.highlightedDriverId = null;
+    pushToCloud();
+});
 window.startDriverCloud = function(id) {
     startDriver(id);
     pushToCloud();

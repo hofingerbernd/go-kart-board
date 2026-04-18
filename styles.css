@@ -1022,3 +1022,159 @@ h1 {
   display: flex;
   justify-content: flex-end;
 }
+
+/* === TV FOCUS PANEL === */
+.tv-focus-panel {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 400px;
+  background: rgba(15, 17, 21, 0.95);
+  border: 1px solid rgba(225, 6, 0, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(225, 6, 0, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 500;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.tv-focus-panel.hidden {
+  transform: translateY(120%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.focus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(90deg, var(--accent) 0%, #8a0b0b 100%);
+}
+
+.focus-badge {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: white;
+}
+
+.focus-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.focus-close:hover {
+  color: white;
+}
+
+.focus-body {
+  padding: 1.2rem;
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.focus-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 15px rgba(225, 6, 0, 0.3);
+}
+
+.focus-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-info h2 {
+  font-size: 1.8rem;
+  margin: 0;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.focus-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.focus-kart-badge {
+  background: var(--accent);
+  color: white;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.focus-team-name {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.focus-times {
+  display: flex;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.6rem;
+  border-radius: 8px;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.time-block .time-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.time-block strong {
+  font-size: 1.2rem;
+}
+
+/* === SPOTLIGHT ROW STYLES === */
+.timing-row.is-spotlight {
+  background: linear-gradient(90deg, rgba(225, 6, 0, 0.15) 0%, rgba(225, 6, 0, 0.05) 100%);
+  border-left: 4px solid var(--accent);
+  box-shadow: inset 0 0 20px rgba(225, 6, 0, 0.1);
+  transform: scale(1.01);
+  z-index: 10;
+}
+
+.timing-row.is-spotlight::before {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .tv-focus-panel {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+}
+
